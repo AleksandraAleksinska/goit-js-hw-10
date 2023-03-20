@@ -9,6 +9,13 @@ const DEBOUNCE_DELAY = 300;
 const countryList = document.querySelector('.country-list');
 const countryInfo = document.querySelector('.country-info');
 const searchBox = document.querySelector('#search-box');
+const body = document.querySelector('body');
+
+searchBox.addEventListener('input', _.debounce(() => {
+    fetchCountries()
+    .then((countries) => renderCountries(countries))
+    .catch((error) => Notiflix.Notify.failure('Oops, there is no country with that name'));
+}, DEBOUNCE_DELAY))
 
 
 function renderCountries (countries) {
@@ -50,13 +57,9 @@ function renderCountries (countries) {
     }
     else {
         countryList.innerHTML = '';
-        countryInfo.innerHTML = '';  
+        countryInfo.innerHTML = '';
+            
     }
 }
 
 
-searchBox.addEventListener('input', _.debounce(() => {
-    fetchCountries()
-    .then((countries) => renderCountries(countries))
-    .catch((error) => Notiflix.Notify.failure('Oops, there is no country with that name'));
-}, DEBOUNCE_DELAY))
