@@ -1,4 +1,5 @@
 import './css/styles.css';
+import { fetchCountries } from './fetchCountries';
 
 import Notiflix from 'notiflix';
 const debounce = require('lodash.debounce');
@@ -6,47 +7,56 @@ const _ = require('lodash');
 const DEBOUNCE_DELAY = 300;
 
 const countryList = document.querySelector('.country-list');
+const countryInfo = document.querySelector('.country-info');
 const searchBox = document.querySelector('#search-box');
 
-function fetchCountries() {
+
+function renderCountries (countries) {
     
-    fetchedCountries = 'https://restcountries.com/v3.1/name/' + searchBox.value.trim() + '?fields=name,capital,population,flags,languages';
-    return fetch(fetchedCountries).then((response) =>{
-        if(!response.ok) {
-            throw new Error(Notiflix.Notify.failure('Oops, there is no country with that name'));
-        }
-        return response.json();   
-    }) 
+    if (countries.length === 1) {
+        const divMarkup = countries
+        .map(({capital, population, languages}) => {
+            return `<p><b>Capital: </b>${capital}</p>
+             <p><b>Population: </b>${population}</p>
+             <p><b>Languages: </b>${Object.values(countries[0].languages)}</p>`
+        })
+        .join('');
+        const liMarkup = countries
+        .map(({name, flags}) => {
+            return `<li>
+            <h2 class="country-header"><img class="flag-svg" src=${flags.svg} width=45; height=35 />  ${name.official}</h2>
+            </li>`
+        })
+        .join('');
+        countryInfo.innerHTML = divMarkup;
+        countryList.innerHTML = liMarkup;
+        
+    }
+    else if (countries.length <= 10 && countries.length > 1) {
+        const liMarkup = countries
+        .map(({name, flags}) => {
+            return `<li>
+            <p class="country-name"><img class="flag-svg" src=${flags.svg} width=45; height=30 />  ${name.official}</p>
+            </li>`
+        })
+        .join('');
+        countryList.innerHTML = liMarkup;
+        countryInfo.innerHTML = '';
+    }
+    else if (countries.length > 10) {
+        countryList.innerHTML = '';
+        countryInfo.innerHTML = '';
+        Notiflix.Notify.info('Too many matches found. Please enter a more specific name.');
+    }
+    else {
+        countryList.innerHTML = '';
+        countryInfo.innerHTML = '';  
+    }
 }
 
-function renderCountries(countries) {
-    const markup = countries
-    .map(({name, capital, population, flags, languages}) => {
-        if (countries.length ===  1) {   
-        return `<li>
-        <h2 class="country-name"><img class="flag-svg" src=${flags.svg} width=45; height=35 />  ${name.official}</h2>
-        <p><b>Capital: </b>${capital}</p>
-        <p><b>Population: </b>${population}</p>
-        <p><b>Languages: </b>${Object.values(countries[0].languages)}</p>
-        </li>`;
-        }
-
-        else if (countries.length > 1 && countries.length <= 10){
-        return `<li>
-        <h2 class="country-name"><img class="flag-svg" src=${flags.svg} width=45; height=35 />  ${name.official}</h2>
-        </li>`;
-        }
-        else {
-         Notiflix.Notify.info('Too many matches found. Please enter a more specific name.');
-        }        
-    })
-    .join("");
-    countryList.innerHTML = markup;
-    console.log(countries);
-}
 
 searchBox.addEventListener('input', _.debounce(() => {
     fetchCountries()
     .then((countries) => renderCountries(countries))
-    .catch((error) => console.log(error));
+    .catch((error) => Notiflix.Notify.failure('Oops, there is no country with that name'));
 }, DEBOUNCE_DELAY))

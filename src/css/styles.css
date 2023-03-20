@@ -21,11 +21,27 @@ body {
 
 .country-list {
   list-style: none;
+  padding: 0;
+  margin-bottom: 7px;
+  font-weight: 400;
 }
 
 .country-name {
+  
   display: flex;
   gap: 7px;
+  align-items: center;
+  padding: 0;
+  font-weight: 600;
+  font-size: 17px;
+  
+}
+
+.country-header {
+  font-size: 27px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .flag-svg {
